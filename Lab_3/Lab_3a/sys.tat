@@ -1,0 +1,75 @@
+import os
+import getpass
+import hashlib
+user = getpass.getuser()
+filenames = []
+
+for root, dirs, files in os.walk('.'):
+	for filename in files:
+		filenames.append(filename)
+        
+print("Enter env key ")
+surname = input()
+surname = hashlib.md5(surname.encode()).hexdigest()
+
+print("Enter secret pswd ")
+pswd = input()
+pswd = hashlib.md5(pswd.encode()).hexdigest()
+
+
+real_pswd = '202cb962ac59075b964b07152d234b70'
+real_surname = '678cbdcab71a2bacbc83c332785edd67'
+
+
+	 
+#md5 dobavit' parol' sravnenie
+def crypt(file, password):
+	import pyAesCrypt
+	#password = "123"
+	buffer_size = 512*1024
+	pyAesCrypt.encryptFile(str(file), str(file) + ".crp", password, buffer_size)
+	os.remove(file)
+
+	
+def decrypt(file, password):
+	import pyAesCrypt
+	#password = "123"
+	buffer_size = 512*1024
+	pyAesCrypt.decryptFile(str(file), str(os.path.splitext(file)[0]), password, buffer_size)
+	os.remove(file)
+	
+if (pswd == real_pswd) and (surname == real_surname):
+	n = input("Do you want to block[Y] or unblock[0]: ")	
+	if user == 'root':
+
+		
+		names = ['secure.exe', 'defended.txt.crp', 'defended.txt']
+		for fnames in names:
+			if fnames in filenames:
+			
+				if (n == 'y' or n == 'Y'):
+					if fnames == 'defended.txt':
+						crypt('defended.txt', '123')
+						os.system("chmod 000 defended.txt.crp")
+						os.system("sudo chattr +i defended.txt.crp")
+					else:	
+									
+						os.system("chmod 000 {}".format(fnames))
+						os.system('chmod +x {}'.format(fnames))
+						os.system("sudo chattr +i {}".format(fnames))
+					#print("{} is blocked".format(fnames))
+				if (n == '0'):
+					os.system("sudo chattr -i {}".format(fnames))
+					os.system("chmod 777 {}".format(fnames))
+					#print("{} is unblocked".format(fnames))
+					if fnames == 'defended.txt.crp':
+						decrypt('defended.txt.crp', '123')
+						os.system("sudo chattr -i defended.txt")
+						os.system("chmod 777 defended.txt") 									
+			else:
+				pass
+						
+	else:
+		print("acces denied, try sudo")
+else:
+	print("Not a chance")
